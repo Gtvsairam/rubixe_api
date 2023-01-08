@@ -56,10 +56,10 @@ app.post('/login',async (req,res)=>{
         if(res.status(201)){
             return res.json({status:"ok",token:token,data:user})
         }else{
-            return res.json({ status:"error",error:"Invalid Password"})
+           return res.json({error:"error"})
         }
     }
-    
+    res.json({ status:"error",error:"Invalid Password"})
     }
     catch(err){
         res.send({status:"error"})
