@@ -1,9 +1,13 @@
 const mongoose = require('mongoose');
+// const nodemailer = require('nodemailer')
 
-
-const signupuser = new mongoose.Schema({
-    username:{
+const User = new mongoose.Schema({
+    name:{
         type: String,
+        require: true
+    },
+    mobile:{
+        type: Number,
         require: true
     },
     email:{
@@ -14,8 +18,19 @@ const signupuser = new mongoose.Schema({
     password:{
         type: String,
         require: true
+    },
+    state:{
+        type: String,
+        require: true
+    },
+    city:{
+        type: String,
+        require: true
+    },
+    image:{
+        type: String,
     }
 },{
     timestamps:true,
 })
-module.exports = mongoose.model('signupuser', signupuser)
+module.exports = mongoose.model('User', User)

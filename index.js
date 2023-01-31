@@ -10,34 +10,48 @@ const port = process.env.Port || 5001
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect("mongodb+srv://gtvsairam26:e5LWRZj4XmRB3e3a@cluster0.iiacnaa.mongodb.net/RUBIXE-BLOG",{
+mongoose.connect("mongodb+srv://gtvsairam26:e5LWRZj4XmRB3e3a@cluster0.iiacnaa.mongodb.net/RUBIXE-BLOGDashboard",{
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(()=>{
     console.log("mongoose connection established...");
 })
 ///////////////Signup Authentication//////////////////
-app.post('/signup',async (req, res)=>{
-    try {
-       const {username, email, password} = req.body;
-       console.log(username,email,password);
-       const hashPass = await bcrypt.hash(password,10)
-       let exist = await model.findOne({email})
-        if(exist) {
-            return res.status(400).send('User Already Exit');
-        }
-        const user = new model({username,email,password:hashPass})
-        await user.save();
-        const result = await model.insertMany(user);
-        res.send({status:"ok"})
-       console.log(result);
-        res.status(200).send('Registered Successfully');
-
-    } catch (error) {
-        console.log(error);
-        return res.status(500).send('Internel Server Error')
+app.post('/api/register',async (req, res)=>{
+    let product = new model(req.body)
+    let result = await product.save();
+    res.send(result);
+});
+app.get('/api/getuser', async (req, res) =>{
+    let getusers = await model.find();
+    if(getusers.length > 0){
+        res.send(getusers);
+    }
+    else{
+        res.send({result: "no user found"})
     }
 })
+app.delete('/api/deleteuser/:id',async (req,res)=>{
+    let result = await model.deleteOne({_id: req.params.id});
+    res.send(result)
+})
+app.get('/api/updateuser/:id', async (req, res) => {
+    let result = await model.findOne({ _id: req.params.id });
+    if (result) {
+      res.send(result);
+    } else {
+      res.send({ result: "no user found" });
+    }
+  });
+  app.put('/api/updateuser/:id', async (req,res)=>{
+    let result = await model.updateOne(
+        {_id: req.params.id},
+        {
+            $set:req.body,
+        }
+    )
+    res.send(result);
+  });
 
 ////////////////////login Authentication//////////////////////
 const SECRET_KEY = 'sdf34jsd9264hlgf'
@@ -45,26 +59,28 @@ app.post('/login',async (req,res)=>{
 
     const {email,password} = req.body
     console.log(email,password);
-    try{
-        const user = await model.findOne({email})
-    if(!user){
-        return res.json({error:"User not found"})
-    }
-    if(bcrypt.compare(password,user.password)){
-        const token = jwt.sign({},SECRET_KEY);
-        console.log(user,"hello.......");
-        if(res.status(201)){
-            return res.json({status:"ok",token:token,data:user})
-        }else{
-            return res.json({ status:"error",error:"Invalid Password"})
+    try {
+		const user = await model.findOne({email});
+		if (!user)
+			return res.status(401).send({ message: "Invalid Email or Password" });
+
+		const validPassword = bcrypt.compare(password, user.password);
+        if(!validPassword){
+            return  res.status(401).send({ message: "Invalid Email or Password" });
+           
         }
-    }
-    
-    }
-    catch(err){
-        res.send({status:"error"})
-        console.log(err);
-    }
+        
+		else{
+            const token = jwt.sign({},SECRET_KEY,{expiresIn:'1h'});
+            console.log(user,'helloo');           
+             return   res.status(201).send({ status:"ok", data: token, message: "logged in successfully" });
+            }
+        }
+        
+        
+	catch (error) {
+		res.status(500).send({ message: "Internal Server Error" });
+	}
 })
 
   
