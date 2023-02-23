@@ -94,6 +94,7 @@ app.get('/api/updateuser/:id', async (req, res) => {
 const SECRET_KEY = 'sdf34jsd9264hlgf'
 // app.post('/login',async (req,res)=>{
 
+<<<<<<< HEAD
 //     const {email,password} = req.body
 //     console.log(email,password);
 //     try {
@@ -119,6 +120,31 @@ const SECRET_KEY = 'sdf34jsd9264hlgf'
 // 		res.status(500).send({ message: "Internal Server Error" });
 // 	}
 // })
+=======
+    const {email,password} = req.body
+    console.log(email,password);
+    try{
+        const user = await model.findOne({email})
+    if(!user){
+        return res.json({error:"User not found"})
+    }
+    if(bcrypt.compare(password,user.password)){
+        const token = jwt.sign({},SECRET_KEY);
+        console.log(user,"hello.......");
+        if(res.status(201)){
+            return res.json({status:"ok",token:token,data:user})
+        }else{
+           return res.json({error:"error"})
+        }
+    }
+    res.json({ status:"error",error:"Invalid Password"})
+    }
+    catch(err){
+        res.send({status:"error"})
+        console.log(err);
+    }
+})
+>>>>>>> 4bbc683e0460cec3a8b73a34d9d037475683effc
 
   
 
